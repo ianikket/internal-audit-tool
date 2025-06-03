@@ -110,4 +110,20 @@ Summary Table of Errors and Fixes
 | bcryptjs not found             | Installed bcryptjs in backend, ran hash command in correct directory |
 | User table insert errors       | Used correct SQL with all required columns and a bcrypt hash         |
 
-You now have a working local setup, with a user manually inserted into the database, and you can log in to your app! 
+You now have a working local setup, with a user manually inserted into the database, and you can log in to your app!
+
+---
+
+# AI Analysis Fallback Logic (2024 Update)
+
+- The backend now tries OpenAI first for document analysis (if API key is present).
+- If OpenAI is not available or fails, it falls back to using Ollama (local LLM) automatically.
+- Ollama must be installed and running (see README for setup).
+- Ollama responses are streamed and concatenated for full output.
+- This allows the tool to work fully offline if needed.
+
+## Ollama Setup Steps
+1. Install Ollama from https://ollama.com/
+2. Start the server: `ollama serve`
+3. Pull a model: `ollama pull llama3.2:latest`
+4. No OpenAI key required if using Ollama only. 
