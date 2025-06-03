@@ -21,6 +21,45 @@ A comprehensive solution for streamlining internal audit processes, automating c
 - AI/NLP: Google Cloud NLP
 - Authentication: OAuth 2.0/SSO
 
+## AI Analysis Workflow (Updated)
+
+This tool now supports both OpenAI and local LLMs via Ollama for document analysis:
+- By default, the backend tries to use OpenAI (gpt-3.5-turbo) if an API key is present in the backend `.env`.
+- If OpenAI is not available or fails, the backend automatically falls back to using a local Ollama model (e.g., llama3.2:latest).
+- Ollama responses are streamed and concatenated for full output.
+- This means the tool can work fully offline (no OpenAI key required) if you have Ollama and a compatible model installed.
+
+### Ollama Setup
+1. Install Ollama from https://ollama.com/ (macOS, Linux, Windows supported).
+2. Start the Ollama server:
+   ```sh
+   ollama serve
+   ```
+3. Pull a model (e.g., llama3.2:latest):
+   ```sh
+   ollama pull llama3.2:latest
+   ```
+4. The backend will use this model automatically if OpenAI is not available.
+
+### Requirements (Updated)
+- Node.js (v18 or higher)
+- PostgreSQL (v14 or higher)
+- npm or yarn
+- (Optional) OpenAI API key for cloud-based analysis
+- (Optional, but recommended) Ollama for local/offline LLM analysis
+
+### How It Works (AI Analysis)
+- When a document is uploaded, the backend extracts the text and sends it to OpenAI (if configured).
+- If OpenAI fails or is not configured, the backend sends the prompt to Ollama and streams the response.
+- The full AI response is parsed and stored as an assessment.
+
+### Example: Running Locally with Ollama Only
+- You do not need an OpenAI key if you have Ollama running and a model pulled.
+- The backend will use Ollama for all AI analysis.
+
+---
+For more details, see the code comments in `backend/src/services/ai.service.ts` and the updated workflow above.
+
 ## Getting Started
 
 ### Prerequisites
@@ -79,7 +118,8 @@ How the Tool Works
 1. Document Upload & AI-Powered Control Extraction
 Users upload documents (PDF or Word) via the frontend.
 The backend (document.routes.ts) handles file uploads using multer, saves them to the uploads/ directory, and extracts text using libraries like pdf-parse, mammoth, or textract.
-The extracted text is sent to an AI service (ai.service.ts), which uses OpenAI’s API to analyze the document and return a JSON with a summary, controls, and risks.
+The extracted text is sent to an AI service (ai.service.ts), which uses OpenAI's API to analyze the document and return a JSON with a summary, controls, and risks.
+If Open AI is not available, fallbacks to Ollama based local analysis. Ollama is required to be up and running on your local system. Ollama shares data in a stream unlike OpenAI, so whenever AI analysis falls back on ollama, it also reads and collects entire data stream, concatinates it at end and presents as AI summary.
 The results are stored in the database as an Assessment.
 2. Internal Audit Tracker & Assessment Management
 Assessments (results of document analysis) are managed via the /api/assessments endpoints (assessment.routes.ts).
@@ -93,7 +133,7 @@ The database stores users, assessments, and related data.
 5. Frontend
 Built with React + TypeScript (in frontend/), providing the user interface for all features.
 6. AI/NLP
-Uses OpenAI’s GPT model for document analysis (API key required in backend .env).
+Uses OpenAI's GPT model for document analysis (API key required in backend .env).
 Key Files and Their Roles
 backend/src/routes/document.routes.ts: Handles document upload, text extraction, AI analysis, and saving results as assessments.
 backend/src/services/ai.service.ts: Sends extracted text to OpenAI and formats the response.
