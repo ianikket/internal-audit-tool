@@ -1,0 +1,113 @@
+Internal Audit Tool - Setup, Debugging, and Error Resolution Log
+===============================================================
+
+1. Project Setup & Dependency Installation
+------------------------------------------
+- Cloned/downloaded the project files.
+- Installed backend dependencies:
+  cd backend
+  npm install
+- Installed frontend dependencies:
+  cd frontend
+  npm install
+
+2. Environment Configuration
+----------------------------
+- Copied .env.example to .env in both backend and frontend folders.
+- Filled in required values (database credentials, JWT secret, etc.) in .env files.
+
+3. TypeScript & Decorator Issues
+-------------------------------
+- Error: TypeScript compilation failed due to missing decorator support and property initialization.
+- Fixes:
+  - Enabled experimentalDecorators and emitDecoratorMetadata in backend/tsconfig.json.
+  - Added import 'reflect-metadata'; to the top of backend/src/index.ts.
+  - Added definite assignment assertions (!) to all model properties in User.ts and Assessment.ts.
+
+4. Database Setup and Connection Errors
+---------------------------------------
+- Error: error: Error connecting to database: {"code":"ECONNREFUSED", ...}
+- Fixes:
+  - Installed PostgreSQL using Homebrew.
+  - Started PostgreSQL with brew services start postgresql@14.
+  - Created the iacmt database with createdb -U postgres iacmt.
+  - Ensured the postgres user/role existed (createuser -s postgres).
+
+5. Node Module Platform Mismatch
+-------------------------------
+- Error: Error: You installed esbuild for another platform than the one you're currently using.
+- Fixes:
+  - Deleted node_modules and package-lock.json in frontend.
+  - Re-ran npm install in frontend.
+
+6. Backend and Frontend Startup
+------------------------------
+- Started backend:
+  cd backend
+  npm run dev
+- Started frontend:
+  cd frontend
+  npm run dev
+
+7. User Account Creation and Password Hashing
+---------------------------------------------
+- No registration page was available, so a user was inserted manually.
+- Installed bcryptjs in backend to generate password hashes:
+  npm install bcryptjs
+- Generated a bcrypt hash for the password:
+  node -e "console.log(require('bcryptjs').hashSync('yourpassword', 10))"
+- Error: Error: Cannot find module 'bcryptjs'
+- Fix: Made sure to run the command in the backend directory where bcryptjs was installed.
+
+8. Manual User Insertion (as shown in terminal screenshot)
+---------------------------------------------------------
+- Connected to PostgreSQL:
+  psql -U postgres
+  \c iacmt
+- Checked the users table:
+  \dt
+  select * from users;
+- Inserted a user with all required columns:
+
+  INSERT INTO users (
+    id,
+    email,
+    password,
+    "firstName",
+    "lastName",
+    role,
+    "isActive",
+    "createdAt",
+    "updatedAt"
+  ) VALUES (
+    gen_random_uuid(),
+    'bhagyashri.paste@cred.club',
+    '$2a$10$1Tcq/ReEodt51lHSB...ENDZBt2R...J6mR08G', -- bcrypt hash
+    'Bhagyashri',
+    'Paste',
+    'admin',
+    true,
+    NOW(),
+    NOW()
+  );
+- Verified the user was inserted:
+  select * from users;
+
+9. Login and Success
+--------------------
+- Logged in to the frontend using:
+  Email: bhagyashri.paste@cred.club
+  Password: (the password you hashed)
+- Confirmed the app is working!
+
+Summary Table of Errors and Fixes
+---------------------------------
+| Error/Issue                    | How We Fixed It                                                      |
+|-------------------------------|---------------------------------------------------------------------|
+| TypeScript decorator errors    | Enabled decorators in tsconfig, added reflect-metadata, fixed models |
+| Database connection refused    | Installed and started PostgreSQL, created DB and user                |
+| esbuild platform mismatch      | Deleted node_modules and lock file, reinstalled dependencies         |
+| bcryptjs not found             | Installed bcryptjs in backend, ran hash command in correct directory |
+| User table insert errors       | Used correct SQL with all required columns and a bcrypt hash         |
+
+You now have a working local setup, with a user manually inserted into the database, and you can log in to your app! 
